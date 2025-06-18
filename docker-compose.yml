@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+  web:
+    build: .
+    command: bin/rails server -b 0.0.0.0
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432
+      RAILS_ENV: development
+    volumes:
+      - .:/rails
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+volumes:
+  postgres-data:
