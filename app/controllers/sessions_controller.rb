@@ -10,5 +10,4 @@ class SessionsController < ApplicationController
       render json: { error: "Invalid credentials" }, status: :unauthorized
     end
   end
-
 end

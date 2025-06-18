@@ -42,5 +42,4 @@ module Authentication
         Current.session = session
       end
     end
-
 end
