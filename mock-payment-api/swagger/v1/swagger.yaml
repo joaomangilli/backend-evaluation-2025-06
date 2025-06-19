@@ -14,3 +14,66 @@ paths:
               schema:
                 type: string
                 example: ok
+  /payment-tokens:
+    post:
+      summary: Generate a mock payment token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_number:
+                  type: string
+                expiration:
+                  type: string
+                cvv:
+                  type: string
+              required:
+                - card_number
+                - expiration
+                - cvv
+              example:
+                card_number: '4111111111111111'
+                expiration: '12/25'
+                cvv: '123'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment_token:
+                    type: string
+                    example: 4072a40d26ab1de87a9a4b4554e4a826646647702eab4263c5eeadd12364eedc
+        '400':
+          description: Invalid JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - invalid JSON
+        '422':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - card_number is required
