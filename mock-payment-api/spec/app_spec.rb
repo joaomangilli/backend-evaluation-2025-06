@@ -98,6 +98,54 @@ describe 'POST /payments' do
   end
 end
 
+describe 'POST /simulate-payment' do
+  let(:token_params) do
+    {
+      card_number: '4111111111111111',
+      expiration: '12/25',
+      cvv: '123'
+    }.to_json
+  end
+
+  def generate_token
+    post '/payment-tokens', token_params, { 'CONTENT_TYPE' => 'application/json' }
+    JSON.parse(last_response.body)['payment_token']
+  end
+
+  before do
+    payment_params = {
+      payment_token: generate_token,
+      reservation_id: 'res-123',
+      amount: 1000
+    }.to_json
+    post '/payments', payment_params, { 'CONTENT_TYPE' => 'application/json' }
+  end
+
+  it 'sends webhook requests' do
+    expect(Net::HTTP).to receive(:post).exactly(3).times.and_return(nil)
+    params = { reservation_id: 'res-123', status: 'CONFIRMED' }.to_json
+    post '/simulate-payment', params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(200)
+    json = JSON.parse(last_response.body)
+    expect(json['status']).to eq('SENT')
+  end
+
+  it 'returns 422 for unknown reservation_id' do
+    params = { reservation_id: 'bad', status: 'CONFIRMED' }.to_json
+    post '/simulate-payment', params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(422)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('reservation_id is invalid')
+  end
+
+  it 'returns 400 for invalid JSON' do
+    post '/simulate-payment', 'oops', { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(400)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('invalid JSON')
+  end
+end
+
 describe 'GET /api-docs' do
   it 'redirects to the Swagger UI index' do
     get '/api-docs'
@@ -112,6 +160,6 @@ describe 'GET /api-docs/v1/swagger.yaml' do
     get '/api-docs/v1/swagger.yaml'
     expect(last_response.status).to eq(200)
     yaml = YAML.safe_load(last_response.body)
-    expect(yaml['paths'].keys).to include('/status', '/payment-tokens', '/payments')
+    expect(yaml['paths'].keys).to include('/status', '/payment-tokens', '/payments', '/simulate-payment')
   end
 end

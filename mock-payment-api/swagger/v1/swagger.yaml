@@ -144,3 +144,65 @@ paths:
                 example:
                   errors:
                     - payment_token is required
+  /simulate-payment:
+    post:
+      summary: Trigger payment webhook manually
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reservation_id:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                    - CONFIRMED
+                    - PAYMENT_FAILED
+              required:
+                - reservation_id
+                - status
+              example:
+                reservation_id: reservation-id
+                status: CONFIRMED
+      responses:
+        '200':
+          description: Webhooks sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: SENT
+        '400':
+          description: Invalid JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - invalid JSON
+        '422':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - reservation_id is required
