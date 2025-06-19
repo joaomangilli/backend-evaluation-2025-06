@@ -4,11 +4,11 @@
 #
 
 [
-  "user1@example.com",
-  "user2@example.com",
-  "user3@example.com",
-  "user4@example.com",
-  "user5@example.com"
+  "alice@email.com",
+  "bob@email.com",
+  "carol@email.com",
+  "dave@email.com",
+  "eve@email.com"
 ].each do |addr|
   User.find_or_create_by!(email: addr) do |u|
     u.password = "password"
