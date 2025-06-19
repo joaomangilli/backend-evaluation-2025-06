@@ -60,6 +60,7 @@ GEM
     minitest (5.25.5)
     mustermann (3.0.3)
       ruby2_keywords (~> 0.0.1)
+    nio4r (2.7.4)
     nokogiri (1.18.8-x86_64-linux-gnu)
       racc (~> 1.4)
     parallel (1.27.0)
@@ -73,6 +74,8 @@ GEM
     psych (5.2.6)
       date
       stringio
+    puma (6.6.0)
+      nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.1.16)
     rack-protection (4.1.1)
@@ -182,6 +185,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  puma
   rack-test
   rspec
   rswag-api
