@@ -25,7 +25,7 @@ default: &default
 
 development:
   <<: *default
-  database: backend_evaluation_2025_06_development
+  database: park42_development
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
@@ -50,7 +50,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: backend_evaluation_2025_06_test
+  database: park42_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -75,18 +75,18 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: backend_evaluation_2025_06_production
-    username: backend_evaluation_2025_06
-    password: <%= ENV["BACKEND_EVALUATION_2025_06_DATABASE_PASSWORD"] %>
+    database: park42_production
+    username: park42
+    password: <%= ENV["PARK42_DATABASE_PASSWORD"] %>
   cache:
     <<: *primary_production
-    database: backend_evaluation_2025_06_production_cache
+    database: park42_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: backend_evaluation_2025_06_production_queue
+    database: park42_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: backend_evaluation_2025_06_production_cable
+    database: park42_production_cable
     migrations_paths: db/cable_migrate

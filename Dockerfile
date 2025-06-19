@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t backend_evaluation_2025_06 .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name backend_evaluation_2025_06 backend_evaluation_2025_06
+# docker build -t park42 .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name park42 park42
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
