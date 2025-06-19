@@ -7,7 +7,11 @@ class PricesController < ApplicationController
     end_at = Time.zone.parse(params[:end_at])
 
     total_days = (end_at.to_date - start_at.to_date).to_i
-    total_days = 0 if total_days.negative?
+    if total_days.negative?
+      total_days = 0
+    else
+      total_days += 1
+    end
     total_price = total_days * DAILY_FEE
 
     render json: { price: total_price, currency: "BRL" }

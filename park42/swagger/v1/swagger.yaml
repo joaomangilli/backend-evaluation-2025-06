@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: API V1
+  title: Park42
   version: v1
 paths:
   /session:
@@ -20,6 +20,9 @@ paths:
               required:
                 - email
                 - password
+            example:
+              email: alice@email.com
+              password: password
       responses:
         '201':
           description: created
