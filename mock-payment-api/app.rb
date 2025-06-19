@@ -2,10 +2,13 @@
 
 require 'sinatra/base'
 require 'openssl'
+require 'set'
 
 # Simple Sinatra application to emulate a payment service
 class MockPaymentAPI < Sinatra::Base
   disable :protection
+
+  VALID_PAYMENT_TOKENS = Set.new
 
   set :port, 4000
 
@@ -52,8 +55,46 @@ class MockPaymentAPI < Sinatra::Base
     end
 
     token = OpenSSL::HMAC.hexdigest('SHA256', 'secret_key', payload.to_json)
+    VALID_PAYMENT_TOKENS << token
     content_type :json
     { payment_token: token }.to_json
+  end
+
+  post '/payments' do
+    raw_body = request.body.read
+    begin
+      payload = JSON.parse(raw_body)
+    rescue JSON::ParserError
+      status 400
+      content_type :json
+      return({ errors: [ 'invalid JSON' ] }.to_json)
+    end
+
+    errors = []
+    payment_token = payload['payment_token']
+    reservation_id = payload['reservation_id']
+    amount = payload['amount']
+
+    if payment_token.nil? || payment_token.to_s.empty?
+      errors << 'payment_token is required'
+    elsif payment_token !~ /\A[0-9a-f]{64}\z/ || !VALID_PAYMENT_TOKENS.include?(payment_token)
+      errors << 'payment_token is invalid'
+    end
+    errors << 'reservation_id is required' if reservation_id.nil? || reservation_id.to_s.empty?
+    if amount.nil?
+      errors << 'amount is required'
+    elsif !amount.is_a?(Integer) || amount <= 0
+      errors << 'amount must be a positive integer'
+    end
+
+    unless errors.empty?
+      status 422
+      content_type :json
+      return({ errors: errors }.to_json)
+    end
+
+    content_type :json
+    { status: 'PROCESSING' }.to_json
   end
 end
 
