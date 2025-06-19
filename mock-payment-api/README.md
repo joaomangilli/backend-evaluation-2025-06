@@ -13,7 +13,7 @@ bundle install
 ```
 bin/dev
 ```
-The service listens on port `4000` by default.
+The service listens on port `4000` by default using Puma.
 
 Swagger documentation is available in a UI at `http://localhost:4000/api-docs`.
 
