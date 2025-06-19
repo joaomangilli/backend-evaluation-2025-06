@@ -49,3 +49,31 @@ paths:
                   payment_token:
                     type: string
                     example: 4072a40d26ab1de87a9a4b4554e4a826646647702eab4263c5eeadd12364eedc
+        '400':
+          description: Invalid JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - invalid JSON
+        '422':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - card_number is required

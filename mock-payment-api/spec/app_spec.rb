@@ -27,6 +27,21 @@ describe 'POST /payment-tokens' do
     expected_token = OpenSSL::HMAC.hexdigest('SHA256', 'secret_key', params)
     expect(json).to eq('payment_token' => expected_token)
   end
+
+  it 'returns 422 when params are invalid' do
+    invalid_params = { card_number: '123', expiration: '13/25', cvv: '12' }.to_json
+    post '/payment-tokens', invalid_params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(422)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('card_number must be digits', 'expiration must be in MM/YY format', 'cvv must be 3 or 4 digits')
+  end
+
+  it 'returns 400 for invalid JSON' do
+    post '/payment-tokens', 'not-json', { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(400)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('invalid JSON')
+  end
 end
 
 describe 'GET /api-docs' do
