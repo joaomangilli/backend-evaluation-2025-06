@@ -1,34 +1,9 @@
-# Park42
+# Backend Evaluation Monorepo
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This repository is structured as a monorepo. Each project lives in its own subdirectory.
 
-Things you may want to cover:
+## Projects
 
-* Ruby version
+- **park42** – Ruby on Rails application that was previously the root of this repository.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-## Development using Docker Compose
-
-Ensure you have Docker and Docker Compose installed. Run the following to start the app and PostgreSQL (using Postgres 17.5):
-
-```bash
-docker-compose up --build
-```
-
-The Rails server will be available at http://localhost:3000 and the database at port 5432.
+To work on the Rails project, `cd` into `park42` and follow its README instructions.
