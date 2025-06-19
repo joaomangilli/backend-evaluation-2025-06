@@ -14,6 +14,16 @@ services:
       - redis-data:/data
     ports:
       - '6379:6379'
+  mock-payment-api:
+    image: ruby:3.4
+    working_dir: /app
+    volumes:
+      - ./mock-payment-api:/app
+    command: bash -c 'bundle install && bin/dev'
+    environment:
+      RACK_ENV: development
+    ports:
+      - '4000:4000'
 volumes:
   postgres-data:
   redis-data:
