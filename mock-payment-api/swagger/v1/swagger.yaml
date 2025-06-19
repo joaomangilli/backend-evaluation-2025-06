@@ -1,0 +1,16 @@
+openapi: 3.0.1
+info:
+  title: Mock Payment API
+  version: v1
+paths:
+  /status:
+    get:
+      summary: API status
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ok
