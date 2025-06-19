@@ -25,7 +25,8 @@ Things you may want to cover:
 
 ## Development using Docker Compose
 
-Ensure you have Docker and Docker Compose installed. Run the following to start the app and PostgreSQL (using Postgres 17.5):
+Ensure you have Docker and Docker Compose installed. From the repository root,
+run the following to start PostgreSQL, Redis and the mock payment API:
 
 ```bash
 docker-compose up --build
