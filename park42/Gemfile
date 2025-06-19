@@ -29,6 +29,9 @@ gem "kamal", require: false
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
+# Background job processing with Redis
+gem "sidekiq"
+
 # Swagger API documentation
 gem "rswag-ui"
 gem "rswag-api"
