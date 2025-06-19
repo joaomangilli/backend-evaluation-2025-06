@@ -1,0 +1,11 @@
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  /session:
+    post:
+      summary: Create session
+      responses:
+        '201':
+          description: created
