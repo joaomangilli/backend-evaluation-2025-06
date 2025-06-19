@@ -9,7 +9,7 @@ Rswag::Ui.configure do |c|
 
   # In rswag 2.x `swagger_endpoint` is deprecated and will be renamed to
   # `openapi_endpoint` in v3.0. Use the new method to avoid warnings.
-  c.openapi_endpoint "/api-docs/v1/swagger.yaml", "Park42 API Docs"
+  c.openapi_endpoint "/api-docs/v1/swagger.yaml", "Packer42 API Docs"
 
   # Add Basic Auth in case your API is private
   # c.basic_auth_enabled = true
