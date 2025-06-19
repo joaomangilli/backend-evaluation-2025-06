@@ -44,6 +44,60 @@ describe 'POST /payment-tokens' do
   end
 end
 
+describe 'POST /payments' do
+  let(:token_params) do
+    {
+      card_number: '4111111111111111',
+      expiration: '12/25',
+      cvv: '123'
+    }.to_json
+  end
+
+  def generate_token
+    post '/payment-tokens', token_params, { 'CONTENT_TYPE' => 'application/json' }
+    JSON.parse(last_response.body)['payment_token']
+  end
+
+  let(:params) do
+    {
+      payment_token: generate_token,
+      reservation_id: 'res-123',
+      amount: 20_000
+    }.to_json
+  end
+
+  it 'returns PROCESSING status' do
+    post '/payments', params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(200)
+    json = JSON.parse(last_response.body)
+    expect(json).to eq('status' => 'PROCESSING')
+  end
+
+  it 'returns 422 when params are invalid' do
+    invalid = { payment_token: 'bad', amount: -1 }.to_json
+    post '/payments', invalid, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(422)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('payment_token is invalid', 'reservation_id is required', 'amount must be a positive integer')
+  end
+
+  it 'rejects tokens not issued by the API' do
+    invalid_token = 'a' * 64
+    invalid = { payment_token: invalid_token, reservation_id: 'res-123', amount: 1000 }.to_json
+    post '/payments', invalid, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(422)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('payment_token is invalid')
+  end
+
+  it 'returns 400 for invalid JSON' do
+    post '/payments', 'oops', { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(400)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('invalid JSON')
+  end
+end
+
 describe 'GET /api-docs' do
   it 'redirects to the Swagger UI index' do
     get '/api-docs'
@@ -58,6 +112,6 @@ describe 'GET /api-docs/v1/swagger.yaml' do
     get '/api-docs/v1/swagger.yaml'
     expect(last_response.status).to eq(200)
     yaml = YAML.safe_load(last_response.body)
-    expect(yaml['paths'].keys).to include('/status', '/payment-tokens')
+    expect(yaml['paths'].keys).to include('/status', '/payment-tokens', '/payments')
   end
 end
