@@ -29,6 +29,13 @@ module Park42
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # Sidekiq::Web requires a session middleware even in API-only apps.
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use(
+      ActionDispatch::Session::CookieStore,
+      key: "_park42_session"
+    )
+
     # Use Sidekiq backed by Redis for background jobs
     config.active_job.queue_adapter = :sidekiq
   end
