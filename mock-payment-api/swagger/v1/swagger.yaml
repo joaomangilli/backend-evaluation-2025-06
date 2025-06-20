@@ -160,7 +160,7 @@ paths:
                   type: string
                   enum:
                     - CONFIRMED
-                    - PAYMENT_FAILED
+                    - FAILED
               required:
                 - reservation_id
                 - status

@@ -122,7 +122,8 @@ describe 'POST /simulate-payment' do
   end
 
   it 'sends webhook requests' do
-    expect(Net::HTTP).to receive(:post).exactly(3).times.and_return(nil)
+    allow(Kernel).to receive(:sleep)
+    expect(Net::HTTP).to receive(:post).exactly(9).times.and_return(nil)
     params = { reservation_id: 'res-123', status: 'CONFIRMED' }.to_json
     post '/simulate-payment', params, { 'CONTENT_TYPE' => 'application/json' }
     expect(last_response.status).to eq(200)
@@ -136,6 +137,14 @@ describe 'POST /simulate-payment' do
     expect(last_response.status).to eq(422)
     json = JSON.parse(last_response.body)
     expect(json['errors']).to include('reservation_id is invalid')
+  end
+
+  it 'returns 422 for invalid status' do
+    params = { reservation_id: 'res-123', status: 'WRONG' }.to_json
+    post '/simulate-payment', params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(422)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('status is invalid')
   end
 
   it 'returns 400 for invalid JSON' do

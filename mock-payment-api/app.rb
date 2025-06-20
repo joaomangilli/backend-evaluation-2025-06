@@ -124,7 +124,7 @@ class MockPaymentAPI < Sinatra::Base
 
     if status_param.nil? || status_param.to_s.empty?
       errors << 'status is required'
-    elsif !%w[CONFIRMED PAYMENT_FAILED].include?(status_param)
+    elsif !%w[CONFIRMED FAILED].include?(status_param)
       errors << 'status is invalid'
     end
 
@@ -135,8 +135,11 @@ class MockPaymentAPI < Sinatra::Base
     end
 
     body = { reservation_id: reservation_id, status: status_param }.to_json
-    3.times do
-      Net::HTTP.post(URI(WEBHOOK_URL), body, 'Content-Type' => 'application/json')
+    3.times do |batch|
+      3.times do
+        Net::HTTP.post(URI(WEBHOOK_URL), body, 'Content-Type' => 'application/json')
+      end
+      sleep 5 if batch < 2
     end
 
     content_type :json
