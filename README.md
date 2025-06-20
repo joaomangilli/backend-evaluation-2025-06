@@ -30,3 +30,11 @@ PostgreSQL is exposed on port `5432`, Redis on `6379`, and the payment API on
 `4000`.
 
 To work on the Rails project, `cd` into `park42` and follow its README instructions.
+Common `bin` commands can also be run from the repository root via wrapper scripts:
+
+```bash
+bin/dev      # starts the Rails server
+bin/rails    # runs the rails executable
+bin/bundle   # runs bundler
+bin/rubocop  # runs the linter
+```
