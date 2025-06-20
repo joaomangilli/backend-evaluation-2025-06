@@ -1,6 +1,8 @@
-# Backend Evaluation 2025-06 - Park42 - Recognition
+# Backend Evaluation 2025-06 - Park42
 
-This monorepo contains the **Park42** Rails API and a supporting mock payment service used during development.
+**Park42** is a car parking reservation service, similar to those used for booking airport parking spots in advance.
+
+This monorepo contains the **Park42** API and a supporting mock payment service used during development.
 
 ## Requirements
 
@@ -12,12 +14,8 @@ This monorepo contains the **Park42** Rails API and a supporting mock payment se
 
 - [Rails](https://github.com/rails/rails/)
 - [Sidekiq](https://github.com/sidekiq/sidekiq)
-- [Solid Cache](https://github.com/basecamp/solid_cache)
-- [Solid Queue](https://github.com/basecamp/solid_queue)
-- [Solid Cable](https://github.com/basecamp/solid_cable)
-- [Rswag](https://github.com/rswag/rswag) for API documentation
 
-## Setting up
+## Setting Up
 
 - `bin/bundle install` – Install all dependencies
 - `docker-compose up --build` – Start PostgreSQL, Redis and the mock payment API
@@ -33,7 +31,9 @@ During development the database and auxiliary services run inside Docker, while 
 
 ## Description
 
-Park42 is a small API with token-based authentication. Users create `Sessions` to obtain a token and can request price calculations through the `/prices` endpoint.
+The application is currently in its early stages and consists of a minimal set of entities and endpoints.
+
+Users create `Sessions` to obtain a token and can request price calculations through the `/prices` endpoint.
 
 ## Entities
 
@@ -59,5 +59,10 @@ USERS ||--|{ SESSIONS : ""
 
 ## Critics to the original code
 
-For each assignment you'll be asked to add a `critics.md` document with your thoughts on the provided code. Submit it together with your merge request.
+In addition to a Pull Request for each task, it's expected from you to write a document criticizing the original code provided, where you can mention things that you would change or refactor if it was a real client project. Use the setup and code exploration phase to pay attention to informations that you would add to this document.
 
+The document should be provided in a file called critics.md in a separate Pull Request.
+
+## GitHub Instructions
+
+**TODO**
