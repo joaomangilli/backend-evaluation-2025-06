@@ -61,7 +61,7 @@ USERS ||--|{ SESSIONS : ""
 
 In addition to a Pull Request for each task, it's expected from you to write a document criticizing the original code provided, where you can mention things that you would change or refactor if it was a real client project. Use the setup and code exploration phase to pay attention to informations that you would add to this document.
 
-The document should be provided in a file called critics.md in a separate Pull Request.
+The document should be provided in a file called `critics.md` in a separate Pull Request.
 
 ## GitHub Instructions
 
