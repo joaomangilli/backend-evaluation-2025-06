@@ -38,6 +38,9 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Allow docker containers to access the Rails server via host.docker.internal
+  config.hosts << "host.docker.internal"
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

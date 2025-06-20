@@ -22,6 +22,9 @@ services:
     command: bash -c 'bundle install && bin/dev'
     environment:
       RACK_ENV: development
+      PAYMENT_WEBHOOK_URL: http://host.docker.internal:3000/webhooks/payment
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - '4000:4000'
 volumes:

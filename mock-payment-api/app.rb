@@ -3,12 +3,16 @@
 require 'sinatra/base'
 require 'openssl'
 require 'set'
+require 'net/http'
 
 # Simple Sinatra application to emulate a payment service
 class MockPaymentAPI < Sinatra::Base
   disable :protection
 
   VALID_PAYMENT_TOKENS = Set.new
+  VALID_RESERVATION_IDS = Set.new
+  WEBHOOK_URL = ENV.fetch('PAYMENT_WEBHOOK_URL',
+                         'http://host.docker.internal:3000/webhooks/payment')
 
   set :port, 4000
 
@@ -93,8 +97,53 @@ class MockPaymentAPI < Sinatra::Base
       return({ errors: errors }.to_json)
     end
 
+    VALID_RESERVATION_IDS << reservation_id
     content_type :json
     { status: 'PROCESSING' }.to_json
+  end
+
+  post '/simulate-payment' do
+    raw_body = request.body.read
+    begin
+      payload = JSON.parse(raw_body)
+    rescue JSON::ParserError
+      status 400
+      content_type :json
+      return({ errors: [ 'invalid JSON' ] }.to_json)
+    end
+
+    errors = []
+    reservation_id = payload['reservation_id']
+    status_param = payload['status']
+
+    if reservation_id.nil? || reservation_id.to_s.empty?
+      errors << 'reservation_id is required'
+    elsif !VALID_RESERVATION_IDS.include?(reservation_id)
+      errors << 'reservation_id is invalid'
+    end
+
+    if status_param.nil? || status_param.to_s.empty?
+      errors << 'status is required'
+    elsif !%w[CONFIRMED FAILED].include?(status_param)
+      errors << 'status is invalid'
+    end
+
+    unless errors.empty?
+      status 422
+      content_type :json
+      return({ errors: errors }.to_json)
+    end
+
+    body = { reservation_id: reservation_id, status: status_param }.to_json
+    3.times do |batch|
+      3.times do
+        Net::HTTP.post(URI(WEBHOOK_URL), body, 'Content-Type' => 'application/json')
+      end
+      sleep 5 if batch < 2
+    end
+
+    content_type :json
+    { status: 'SENT' }.to_json
   end
 end
 
