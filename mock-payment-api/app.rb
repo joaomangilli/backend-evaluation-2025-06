@@ -16,6 +16,10 @@ class MockPaymentAPI < Sinatra::Base
 
   set :port, 4000
 
+  get '/' do
+    redirect '/api-docs'
+  end
+
 
   get '/status' do
     'ok'
