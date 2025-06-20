@@ -1,2 +1,6 @@
 #!/usr/bin/env ruby
-exec "./bin/rails", "server", *ARGV
+args = ARGV.dup
+unless args.any? { |arg| arg == '-b' || arg.start_with?('--binding') }
+  args = ['-b', '0.0.0.0', *args]
+end
+exec './bin/rails', 'server', *args
