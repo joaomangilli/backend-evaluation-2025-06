@@ -1,40 +1,68 @@
-# Backend Evaluation Monorepo
+# Backend Evaluation 2025-06 - Park42
 
-This repository is structured as a monorepo. Each project lives in its own subdirectory.
+**Park42** is a car parking reservation service, similar to those used for booking airport parking spots in advance.
 
-## Projects
+This monorepo contains the **Park42** API and a supporting mock payment service used during development.
 
-- **park42** – Ruby on Rails application that was previously the root of this repository.
-- **mock-payment-api** – Sinatra application providing a stub payment service.
+## Requirements
 
-## Docker Compose
+- Ruby 3.4.4
+- [Bundler](https://bundler.io/)
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
-Use the `docker-compose.yml` at the repository root to start PostgreSQL, Redis and the mock payment API:
+## Important Dependencies
 
-```bash
-docker-compose up --build
+- [Rails](https://github.com/rails/rails/)
+- [Sidekiq](https://github.com/sidekiq/sidekiq)
+
+## Setting Up
+
+- `bin/bundle install` – Install all dependencies
+- `docker-compose up --build` – Start PostgreSQL, Redis and the mock payment API
+- `bin/rails db:setup` – Prepare the database
+
+## Running
+
+Use the wrapper scripts at the repository root to work with the Rails application.
+During development the database and auxiliary services run inside Docker, while the application runs on the host.
+
+- `docker-compose up` – Ensure the services are running
+- `bin/dev` – Start the application with automatic reloading
+
+## Description
+
+The application is currently in its early stages and consists of a minimal set of entities and endpoints.
+
+Users create `Sessions` to obtain a token and can request price calculations through the `/prices` endpoint.
+
+## Entities
+
+```mermaid
+erDiagram
+USERS {
+    integer id PK
+    varchar email
+    varchar password_digest
+}
+SESSIONS {
+    integer id PK
+    varchar token
+    varchar ip_address
+    varchar user_agent
+    integer user_id FK
+}
+USERS ||--|{ SESSIONS : ""
 ```
 
-PostgreSQL is exposed on port `5432`, Redis on `6379`, and the payment API on `4000`.
+> [!WARNING]
+> Standard Rails fields have been omitted from the diagram for brevity.
 
-## Docker Compose
+## Critics to the original code
 
-Use the `docker-compose.yml` at the repository root to start the supporting
-services and the mock payment API:
+In addition to a Pull Request for each task, it's expected from you to write a document criticizing the original code provided, where you can mention things that you would change or refactor if it was a real client project. Use the setup and code exploration phase to pay attention to informations that you would add to this document.
 
-```bash
-docker-compose up --build
-```
+The document should be provided in a file called critics.md in a separate Pull Request.
 
-PostgreSQL is exposed on port `5432`, Redis on `6379`, and the payment API on
-`4000`.
+## GitHub Instructions
 
-To work on the Rails project, `cd` into `park42` and follow its README instructions.
-Common `bin` commands can also be run from the repository root via wrapper scripts:
-
-```bash
-bin/dev      # starts the Rails server
-bin/rails    # runs the rails executable
-bin/bundle   # runs bundler
-bin/rubocop  # runs the linter
-```
+**TODO**
