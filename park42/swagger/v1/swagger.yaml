@@ -72,6 +72,12 @@ paths:
                     type: integer
                   currency:
                     type: string
+  /up:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: ok
 components:
   securitySchemes:
     bearerAuth:
