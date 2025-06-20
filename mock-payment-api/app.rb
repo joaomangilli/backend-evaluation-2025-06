@@ -11,7 +11,8 @@ class MockPaymentAPI < Sinatra::Base
 
   VALID_PAYMENT_TOKENS = Set.new
   VALID_RESERVATION_IDS = Set.new
-  WEBHOOK_URL = ENV.fetch('PAYMENT_WEBHOOK_URL', 'http://localhost:4000/payment-webhook')
+  WEBHOOK_URL = ENV.fetch('PAYMENT_WEBHOOK_URL',
+                         'http://host.docker.internal:3000/payment-webhook')
 
   set :port, 4000
 

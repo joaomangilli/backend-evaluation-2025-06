@@ -9,6 +9,16 @@ This repository is structured as a monorepo. Each project lives in its own subdi
 
 ## Docker Compose
 
+Use the `docker-compose.yml` at the repository root to start PostgreSQL, Redis and the mock payment API:
+
+```bash
+docker-compose up --build
+```
+
+PostgreSQL is exposed on port `5432`, Redis on `6379`, and the payment API on `4000`.
+
+## Docker Compose
+
 Use the `docker-compose.yml` at the repository root to start the supporting
 services and the mock payment API:
 
