@@ -28,15 +28,7 @@ During development the database and auxiliary services run inside Docker, while 
 
 - `docker-compose up` – Ensure the services are running
 - `bin/dev` – Start the application with automatic reloading
-
-## Tests
-
-Run the RSpec suite from the `park42` directory:
-
-```bash
-cd park42
-bundle exec rspec
-```
+- `bin/bundle exec rspec` – Run the test suite
 
 ## Description
 
