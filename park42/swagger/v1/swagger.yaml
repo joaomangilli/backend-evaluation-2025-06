@@ -68,10 +68,16 @@ paths:
               schema:
                 type: object
                 properties:
+                  price_token:
+                    type: string
                   price:
                     type: integer
                   currency:
                     type: string
+              example:
+                price_token: "<price_token>"
+                price: 20000
+                currency: BRL
   /up:
     get:
       summary: Health check
