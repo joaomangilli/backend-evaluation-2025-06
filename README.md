@@ -1,4 +1,4 @@
-# Backend Evaluation 2025-06 - Park42
+# Backend Evaluation S2/2025 - Park42
 
 **Park42** is a car parking reservation service, similar to those used for booking airport parking spots in advance.
 
