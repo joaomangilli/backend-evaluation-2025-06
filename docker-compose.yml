@@ -23,6 +23,7 @@ services:
     environment:
       RACK_ENV: development
       PAYMENT_WEBHOOK_URL: http://host.docker.internal:3000/webhooks/payment
+      PAYMENT_WEBHOOK_SECRET: secret
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
