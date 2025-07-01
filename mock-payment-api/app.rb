@@ -13,6 +13,7 @@ class MockPaymentAPI < Sinatra::Base
   VALID_RESERVATION_IDS = Set.new
   WEBHOOK_URL = ENV.fetch('PAYMENT_WEBHOOK_URL',
                          'http://host.docker.internal:3000/webhooks/payment')
+  WEBHOOK_SECRET = ENV.fetch('PAYMENT_WEBHOOK_SECRET', 'secret')
 
   set :port, 4000
 
@@ -139,9 +140,10 @@ class MockPaymentAPI < Sinatra::Base
     end
 
     body = { reservation_id: reservation_id, status: status_param }.to_json
+    headers = { 'Content-Type' => 'application/json', 'X-Webhook-Secret' => WEBHOOK_SECRET }
     3.times do |batch|
       3.times do
-        Net::HTTP.post(URI(WEBHOOK_URL), body, 'Content-Type' => 'application/json')
+        Net::HTTP.post(URI(WEBHOOK_URL), body, headers)
       end
       sleep 5 if batch < 2
     end

@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'openssl'
+require_relative '../app'
 
 describe 'GET /status' do
   it 'returns ok' do
@@ -123,8 +124,15 @@ describe 'POST /simulate-payment' do
 
   it 'sends webhook requests' do
     allow(Kernel).to receive(:sleep)
-    expect(Net::HTTP).to receive(:post).exactly(9).times.and_return(nil)
     params = { reservation_id: 'res-123', status: 'CONFIRMED' }.to_json
+    expected_headers = {
+      'Content-Type' => 'application/json',
+      'X-Webhook-Secret' => MockPaymentAPI::WEBHOOK_SECRET
+    }
+    expect(Net::HTTP).to receive(:post)
+      .with(URI(MockPaymentAPI::WEBHOOK_URL), params, expected_headers)
+      .exactly(9).times
+      .and_return(nil)
     post '/simulate-payment', params, { 'CONTENT_TYPE' => 'application/json' }
     expect(last_response.status).to eq(200)
     json = JSON.parse(last_response.body)

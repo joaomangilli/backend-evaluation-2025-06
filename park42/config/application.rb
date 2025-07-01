@@ -38,5 +38,8 @@ module Park42
 
     # Use Sidekiq backed by Redis for background jobs
     config.active_job.queue_adapter = :sidekiq
+
+    # Secret used to validate incoming requests from the payment service
+    config.payment_api_secret = ENV.fetch("PAYMENT_API_SECRET", "secret")
   end
 end
