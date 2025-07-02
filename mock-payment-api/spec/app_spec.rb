@@ -68,10 +68,19 @@ describe 'POST /payments' do
   end
 
   it 'returns PROCESSING status' do
+    allow_any_instance_of(Object).to receive(:rand).and_return(0.5)
     post '/payments', params, { 'CONTENT_TYPE' => 'application/json' }
     expect(last_response.status).to eq(200)
     json = JSON.parse(last_response.body)
     expect(json).to eq('status' => 'PROCESSING')
+  end
+
+  it 'fails randomly with 500 status' do
+    allow_any_instance_of(Object).to receive(:rand).and_return(0.1)
+    post '/payments', params, { 'CONTENT_TYPE' => 'application/json' }
+    expect(last_response.status).to eq(500)
+    json = JSON.parse(last_response.body)
+    expect(json['errors']).to include('payment processing error')
   end
 
   it 'returns 422 when params are invalid' do
