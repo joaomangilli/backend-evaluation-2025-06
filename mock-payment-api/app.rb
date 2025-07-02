@@ -102,6 +102,12 @@ class MockPaymentAPI < Sinatra::Base
       return({ errors: errors }.to_json)
     end
 
+    if rand < 0.3
+      status 500
+      content_type :json
+      return({ errors: [ 'payment processing error' ] }.to_json)
+    end
+
     VALID_RESERVATION_IDS << reservation_id
     content_type :json
     { status: 'PROCESSING' }.to_json

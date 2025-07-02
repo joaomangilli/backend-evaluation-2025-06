@@ -141,9 +141,23 @@ paths:
                     type: array
                     items:
                       type: string
-                example:
+              example:
+                errors:
+                  - payment_token is required
+        '500':
+          description: Random payment failure
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   errors:
-                    - payment_token is required
+                    type: array
+                    items:
+                      type: string
+              example:
+                errors:
+                  - payment processing error
   /simulate-payment:
     post:
       summary: Trigger payment webhook manually
