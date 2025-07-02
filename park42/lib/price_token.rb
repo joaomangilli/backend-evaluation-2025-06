@@ -2,8 +2,8 @@ class PriceToken
   class << self
     def generate(start_at:, end_at:, price:, currency:)
       payload = {
-        start_at: start_at.iso8601,
-        end_at: end_at.iso8601,
+        start_at: start_at.try(:iso8601),
+        end_at: end_at.try(:iso8601),
         price: price,
         currency: currency
       }
@@ -15,6 +15,15 @@ class PriceToken
       JSON.parse(json, symbolize_names: true)
     rescue ActiveSupport::MessageEncryptor::InvalidMessage
       nil
+    end
+
+    def valid?(token:, start_at:, end_at:, price:, currency:)
+      decrypted = decrypt(token.to_s) || {}
+
+      decrypted[:start_at] == start_at &&
+      decrypted[:end_at] == end_at &&
+      decrypted[:price] == price &&
+      decrypted[:currency] == currency
     end
 
     private

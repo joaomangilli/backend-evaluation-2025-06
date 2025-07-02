@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => "/sidekiq"
   resource :session, only: [ :create ]
   resource :price, only: [ :create ]
+  resource :reservations, only: [ :create ]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

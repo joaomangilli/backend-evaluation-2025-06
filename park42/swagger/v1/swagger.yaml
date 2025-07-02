@@ -78,6 +78,107 @@ paths:
                 price_token: "<price_token>"
                 price: 20000
                 currency: BRL
+  /reservations:
+    post:
+      summary: Create reservation
+      description: |
+        Creates a new parking reservation. Requires a valid price_token from the
+        /price endpoint and a payment_token. The reservation will be processed
+        asynchronously and the status will be updated accordingly.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price_token:
+                  type: string
+                  description: Token received from price calculation endpoint
+                payment_token:
+                  type: string
+                  description: Payment token for processing the transaction
+                start_at:
+                  type: string
+                  format: date-time
+                  example: "2025-06-18T00:00:00Z"
+                end_at:
+                  type: string
+                  format: date-time
+                  example: "2025-06-19T00:00:00Z"
+                amount:
+                  type: integer
+                  description: Total amount in cents
+                  example: 20000
+              required:
+                - price_token
+                - payment_token
+                - start_at
+                - end_at
+                - amount
+            example:
+              price_token: "<price_token>"
+              payment_token: "<payment_token>"
+              start_at: "2025-06-18T00:00:00Z"
+              end_at: "2025-06-19T00:00:00Z"
+              amount: 20000
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  price_token:
+                    type: string
+                  payment_token:
+                    type: string
+                  start_at:
+                    type: string
+                    format: date-time
+                  end_at:
+                    type: string
+                    format: date-time
+                  amount:
+                    type: integer
+                  status:
+                    type: string
+                    enum: [pending, confirmed, failed, expired]
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+              example:
+                id: 1
+                user_id: 1
+                price_token: "<price_token>"
+                payment_token: "<payment_token>"
+                start_at: "2025-06-18T00:00:00Z"
+                end_at: "2025-06-19T00:00:00Z"
+                amount: 20000
+                status: "pending"
+                created_at: "2025-07-02T10:00:00Z"
+                updated_at: "2025-07-02T10:00:00Z"
+        '422':
+          description: unprocessable entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Invalid price token"
   /up:
     get:
       summary: Health check
