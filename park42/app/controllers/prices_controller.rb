@@ -24,12 +24,11 @@ class PricesController < ApplicationController
 
     total_days = (end_at.to_date - start_at.to_date).to_i + 1
     total_price = total_days * DAILY_FEE
-    currency = "BRL"
     price_token = PriceToken.generate(
       start_at: start_at,
       end_at: end_at,
       price: total_price,
-      currency: currency
+      currency:
     )
 
     render json: { price_token: price_token, price: total_price, currency: currency }
