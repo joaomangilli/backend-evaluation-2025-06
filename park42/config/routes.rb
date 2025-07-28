@@ -7,7 +7,10 @@ Rails.application.routes.draw do
   resource :session, only: [ :create ]
   resource :price, only: [ :create ]
   resource :reservations, only: [ :create ]
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  namespace :webhooks do
+    resource :payment, only: [ :create ]
+  end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

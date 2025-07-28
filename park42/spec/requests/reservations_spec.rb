@@ -34,6 +34,7 @@ RSpec.describe "POST /reservations", type: :request do
 
   before do
     allow(RestClient).to receive(:post).and_return(payment_response)
+    allow(UpdateReservationStatusJob).to receive(:perform_in)
 
     ENV["PAYMENT_URL"] = payment_url
   end
@@ -79,6 +80,16 @@ RSpec.describe "POST /reservations", type: :request do
           amount:,
           reservation_id: anything
         }
+      )
+
+      post('/reservations', params:, headers:)
+    end
+
+    it 'enqueues an expiration job' do
+      expect(UpdateReservationStatusJob).to receive(:perform_in).with(
+        15.minutes,
+        anything,
+        'expired'
       )
 
       post('/reservations', params:, headers:)
