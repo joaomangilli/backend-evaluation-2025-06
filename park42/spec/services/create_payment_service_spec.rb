@@ -12,6 +12,8 @@ RSpec.describe CreatePaymentService, type: :service do
     before do
       allow(RestClient).to receive(:post).and_return(response)
       allow(UpdateReservationStatusService).to receive(:update!)
+      allow(UpdateReservationStatusJob).to receive(:perform_in)
+      allow(Rails.logger).to receive(:error)
     end
 
     let(:response) do
@@ -30,6 +32,16 @@ RSpec.describe CreatePaymentService, type: :service do
       expect(RestClient).to receive(:post).with(
         url: "#{url}/payments",
         payload: { payment_token:, amount:, reservation_id: }
+      )
+
+      create_payment_service.create!
+    end
+
+    it 'enqueues UpdateReservationStatusJob with correct parameters' do
+      expect(UpdateReservationStatusJob).to receive(:perform_in).with(
+        15.minutes,
+        reservation_id,
+        'expired'
       )
 
       create_payment_service.create!
@@ -58,6 +70,12 @@ RSpec.describe CreatePaymentService, type: :service do
 
         create_payment_service.create!
       end
+
+      it 'does not enqueue UpdateReservationStatusJob' do
+        expect(UpdateReservationStatusJob).not_to receive(:perform_in)
+
+        create_payment_service.create!
+      end
     end
 
     context 'when RestClient raises an error' do
@@ -74,6 +92,12 @@ RSpec.describe CreatePaymentService, type: :service do
 
       it 'does not update the reservation status' do
         expect(UpdateReservationStatusService).not_to receive(:update!)
+
+        expect { create_payment_service.create! }.to raise_error(CreatePaymentService::Error)
+      end
+
+      it 'does not enqueue UpdateReservationStatusJob' do
+        expect(UpdateReservationStatusJob).not_to receive(:perform_in)
 
         expect { create_payment_service.create! }.to raise_error(CreatePaymentService::Error)
       end

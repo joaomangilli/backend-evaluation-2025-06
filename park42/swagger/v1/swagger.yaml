@@ -179,6 +179,53 @@ paths:
                     type: string
               example:
                 error: "Invalid price token"
+  /webhooks/payment:
+    post:
+      summary: Payment webhook
+      description: |
+        Webhook endpoint for receiving payment status updates from external payment providers.
+        This endpoint is called by payment processors to notify about reservation payment status changes.
+        The status update is processed asynchronously via background job.
+        No authentication required as this is a webhook endpoint.
+      parameters:
+        - name: X-Webhook-Secret
+          in: header
+          description: Webhook secret for request validation
+          required: true
+          schema:
+            type: string
+            example: "secret"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reservation_id:
+                  type: integer
+                  description: ID of the reservation to update
+                  example: 1
+                status:
+                  type: string
+                  description: New payment status for the reservation
+                  enum: [pending, confirmed, failed, expired]
+                  example: "confirmed"
+              required:
+                - reservation_id
+                - status
+            example:
+              reservation_id: 1
+              status: "confirmed"
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Empty response indicating webhook was received successfully
+              example: {}
   /up:
     get:
       summary: Health check
