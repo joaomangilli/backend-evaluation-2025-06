@@ -14,12 +14,24 @@ class UpdateReservationStatusService
     return if status == reservation.status
     return unless reservation.pending?
 
-    reservation.update!(status:)
+    ActiveRecord::Base.transaction do
+      reservation.update!(status:)
+
+      ReservationDatesService.create!(
+        start_at: reservation.start_at,
+        end_at: reservation.end_at,
+        increment: -1
+      ) if decrement?
+    end
   end
 
   private
 
   def reservation
     @reservation ||= Reservation.find(reservation_id)
+  end
+
+  def decrement?
+    [ "failed", "expired" ].include?(status.to_s)
   end
 end

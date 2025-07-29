@@ -22,10 +22,17 @@ class CreateReservationService
 
     raise Error, "Invalid price token" unless valid_price_token?
 
-    begin
-      create_reservation
-    rescue ActiveRecord::RecordNotUnique
-      return reservation
+    ActiveRecord::Base.transaction do
+      begin
+        create_reservation
+      rescue ActiveRecord::RecordNotUnique
+        return reservation
+      end
+
+      ReservationDatesService.create!(
+        start_at: reservation.start_at,
+        end_at: reservation.end_at
+      )
     end
 
     CreatePaymentJob.perform_async(payment_token, amount, reservation.id)

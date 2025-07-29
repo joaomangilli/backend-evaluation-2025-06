@@ -19,6 +19,7 @@ RSpec.describe "POST /reservations", type: :request do
   let(:payment_response) { double(success?: payment_response_success?, body: payment_response_body) }
   let(:payment_response_success?) { true }
   let(:payment_response_body) { {} }
+  let(:max_spots) { '5000' }
 
   let(:params) do
     {
@@ -37,10 +38,12 @@ RSpec.describe "POST /reservations", type: :request do
     allow(UpdateReservationStatusJob).to receive(:perform_in)
 
     ENV["PAYMENT_URL"] = payment_url
+    ENV["MAX_SPOTS"] = max_spots
   end
 
   describe 'successful reservation creation' do
     let(:reservation) { Reservation.last }
+    let(:reservation_dates) { ReservationDate.where(reservation_at: start_at..end_at, reservation_count: 1) }
 
     it 'returns 201' do
       post('/reservations', params:, headers:)
@@ -72,6 +75,12 @@ RSpec.describe "POST /reservations", type: :request do
       expect(reservation.pending?).to be_truthy
     end
 
+    it 'creates the reservation dates' do
+      post('/reservations', params:, headers:)
+
+      expect(reservation_dates.count).to eq(6)
+    end
+
     it 'creates the payment' do
       expect(RestClient).to receive(:post).with(
         url: "#{payment_url}/payments",
@@ -85,14 +94,13 @@ RSpec.describe "POST /reservations", type: :request do
       post('/reservations', params:, headers:)
     end
 
-    it 'enqueues an expiration job' do
-      expect(UpdateReservationStatusJob).to receive(:perform_in).with(
-        15.minutes,
-        anything,
-        'expired'
-      )
+    it 'expires the reservation in 15 minutes' do
+      allow(UpdateReservationStatusJob).to receive(:perform_in).and_call_original
 
       post('/reservations', params:, headers:)
+
+      expect(reservation.expired?).to be_truthy
+      expect(reservation_dates.count).to eq(0)
     end
   end
 
@@ -237,6 +245,113 @@ RSpec.describe "POST /reservations", type: :request do
       it 'returns 422' do
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response_body[:error]).to eq("Amount must be greater than 0")
+      end
+    end
+  end
+
+  context 'parking spots' do
+    let(:reservation) { Reservation.last }
+
+    context 'when there is no spots' do
+      before do
+        create(:reservation_date, reservation_at: start_at.to_date, reservation_count: 2)
+
+        post('/reservations', params:, headers:)
+      end
+
+      let(:reservation_date) { ReservationDate.last }
+      let(:max_spots) { '2' }
+
+      it 'returns 422' do
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response_body[:error]).to include("No available parking spots")
+      end
+
+      it 'does not create a reservation' do
+        expect(reservation).to be_nil
+      end
+
+      it 'does not create a reservation date' do
+        expect(reservation_date.reservation_count).to eq(2)
+      end
+
+      it 'does not call the payment API' do
+        expect(RestClient).not_to receive(:post)
+      end
+    end
+
+    context 'with a lot of reservation dates' do
+      before do
+        create(:reservation_date, reservation_at: 4.days.from_now.to_date, reservation_count: 4)
+        create(:reservation_date, reservation_at: 30.days.from_now.to_date, reservation_count: 1)
+        create(:reservation_date, reservation_at: 8.days.from_now.to_date, reservation_count: 2)
+        create(:reservation_date, reservation_at: 11.days.from_now.to_date, reservation_count: 5)
+
+        post('/reservations', params:, headers:)
+      end
+
+      let(:start_at) { 2.days.from_now }
+      let(:end_at) { 15.days.from_now }
+
+      context 'when there is no spots' do
+        let(:max_spots) { '5' }
+
+        it 'returns 422' do
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response_body[:error]).to include("No available parking spots")
+        end
+      end
+
+      context 'when there is spots' do
+        let(:max_spots) { '6' }
+
+        it 'returns 201' do
+          expect(response).to have_http_status(:created)
+        end
+      end
+    end
+
+    context 'race condition' do
+      context 'when reservation dates are created concurrently' do
+        before do
+          allow(ReservationDate).to receive(:find_or_initialize_by).and_raise(ActiveRecord::RecordNotUnique)
+
+          post('/reservations', params:, headers:)
+        end
+
+        it 'returns 422' do
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response_body[:error]).to include("We could not create the reservation for the given range. Please try again.")
+        end
+
+        it 'does not create a reservation' do
+          expect(reservation).to be_nil
+        end
+
+        it 'does not call the payment API' do
+          expect(RestClient).not_to receive(:post)
+        end
+      end
+
+      context 'when reservation dates are updated concurrently' do
+        before do
+          allow(ReservationDate).to receive(:find_or_initialize_by).and_raise(ActiveRecord::StaleObjectError)
+
+          post('/reservations', params:, headers:)
+        end
+
+        it 'returns 422' do
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response_body[:error]).to include("We could not create the reservation for the given range. Please try again.")
+        end
+
+        it 'does not create a reservation' do
+          expect(reservation).to be_nil
+        end
+
+        it 'does not call the payment API' do
+          expect(RestClient).not_to receive(:post)
+        end
       end
     end
   end

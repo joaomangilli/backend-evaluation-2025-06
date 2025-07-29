@@ -41,5 +41,7 @@ module Park42
 
     # Secret used to validate incoming requests from the payment service
     config.payment_api_secret = ENV.fetch("PAYMENT_API_SECRET", "secret")
+
+    config.active_model.i18n_customize_full_message = true
   end
 end

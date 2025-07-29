@@ -6,6 +6,15 @@ RSpec.describe "POST /webhooks/payment", type: :request do
   let(:secret) { 'secret' }
   let(:status) { 'confirmed' }
   let(:old_status) { 'pending' }
+  let(:max_spots) { '5000' }
+
+  let!(:start_at_reservation_date) do
+    create(:reservation_date, reservation_at: reservation.start_at, reservation_count: 1)
+  end
+
+  let!(:end_at_reservation_date) do
+    create(:reservation_date, reservation_at: reservation.end_at, reservation_count: 3)
+  end
 
   let(:params) do
     {
@@ -21,7 +30,10 @@ RSpec.describe "POST /webhooks/payment", type: :request do
     }
   end
 
-  before { ENV['PAYMENT_WEBHOOK_SECRET'] = secret }
+  before do
+    ENV["MAX_SPOTS"] = max_spots
+    ENV['PAYMENT_WEBHOOK_SECRET'] = secret
+  end
 
   it 'returns 200' do
     post('/webhooks/payment', params:, headers:)
@@ -45,6 +57,54 @@ RSpec.describe "POST /webhooks/payment", type: :request do
       post('/webhooks/payment', params:, headers:)
 
       expect(reservation.reload).to be_confirmed
+    end
+  end
+
+  describe 'from pending to confirmed' do
+    before { post('/webhooks/payment', params:, headers:) }
+
+    let(:old_status) { 'pending' }
+    let(:status) { 'confirmed' }
+
+    it 'changes to confirmed' do
+      expect(reservation.reload.confirmed?).to be_truthy
+    end
+
+    it 'does not change the reservation dates' do
+      expect(start_at_reservation_date.reload.reservation_count).to eq(1)
+      expect(end_at_reservation_date.reload.reservation_count).to eq(3)
+    end
+  end
+
+  describe 'from pending to failed' do
+    before { post('/webhooks/payment', params:, headers:) }
+
+    let(:old_status) { 'pending' }
+    let(:status) { 'failed' }
+
+    it 'changes to failed' do
+      expect(reservation.reload.failed?).to be_truthy
+    end
+
+    it 'changes the reservation dates' do
+      expect(start_at_reservation_date.reload.reservation_count).to eq(0)
+      expect(end_at_reservation_date.reload.reservation_count).to eq(2)
+    end
+  end
+
+  describe 'from pending to expired' do
+    before { post('/webhooks/payment', params:, headers:) }
+
+    let(:old_status) { 'pending' }
+    let(:status) { 'expired' }
+
+    it 'changes to expired' do
+      expect(reservation.reload.expired?).to be_truthy
+    end
+
+    it 'changes the reservation dates' do
+      expect(start_at_reservation_date.reload.reservation_count).to eq(0)
+      expect(end_at_reservation_date.reload.reservation_count).to eq(2)
     end
   end
 
