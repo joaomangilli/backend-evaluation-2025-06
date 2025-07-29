@@ -29,3 +29,12 @@
 
 en:
   hello: "Hello world"
+
+  activerecord:
+    errors:
+      models:
+        reservation_date:
+          attributes:
+            reservation_count:
+              format: "%{message}"
+              less_than_or_equal_to: "No available parking spots"

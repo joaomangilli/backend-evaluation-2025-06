@@ -1,5 +1,6 @@
 class ReservationsController < ApplicationController
   rescue_from CreateReservationService::Error, with: :errors
+  rescue_from ReservationDatesService::Error, with: :errors
 
   def create
     reservation = CreateReservationService.create!(

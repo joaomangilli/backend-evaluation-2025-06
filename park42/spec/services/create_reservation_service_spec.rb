@@ -26,6 +26,7 @@ RSpec.describe CreateReservationService, type: :service do
     before do
       allow(PriceToken).to receive(:valid?).and_return(price_token_valid?)
       allow(CreatePaymentJob).to receive(:perform_async)
+      allow(ReservationDatesService).to receive(:create!)
     end
 
     it 'creates a new reservation successfully' do
@@ -51,6 +52,12 @@ RSpec.describe CreateReservationService, type: :service do
       reservation_service.create!
     end
 
+    it 'calls ReservationDatesService' do
+      expect(ReservationDatesService).to receive(:create!)
+
+      reservation_service.create!
+    end
+
     context 'when reservation already exists' do
       let!(:existing_reservation) { create(:reservation, user:, price_token:, payment_token:, start_at:, end_at:, amount:) }
 
@@ -69,6 +76,12 @@ RSpec.describe CreateReservationService, type: :service do
 
         reservation_service.create!
       end
+
+      it 'does not call ReservationDatesService' do
+        expect(ReservationDatesService).not_to receive(:create!)
+
+        reservation_service.create!
+      end
     end
 
     context 'when reservation already exists (race condition)' do
@@ -76,6 +89,12 @@ RSpec.describe CreateReservationService, type: :service do
 
       it 'does not enqueue payment job' do
         expect(CreatePaymentJob).not_to receive(:perform_async)
+
+        reservation_service.create!
+      end
+
+      it 'does not call ReservationDatesService' do
+        expect(ReservationDatesService).not_to receive(:create!)
 
         reservation_service.create!
       end
@@ -93,11 +112,19 @@ RSpec.describe CreateReservationService, type: :service do
 
       it 'does not create a reservation' do
         expect(Reservation).not_to receive(:create!)
+
         expect { reservation_service.create! }.to raise_error(CreateReservationService::Error)
       end
 
       it 'does not enqueue payment job' do
         expect(CreatePaymentJob).not_to receive(:perform_async)
+
+        expect { reservation_service.create! }.to raise_error(CreateReservationService::Error)
+      end
+
+      it 'does not call ReservationDatesService' do
+        expect(ReservationDatesService).not_to receive(:create!)
+
         expect { reservation_service.create! }.to raise_error(CreateReservationService::Error)
       end
     end
@@ -114,6 +141,13 @@ RSpec.describe CreateReservationService, type: :service do
 
       it 'does not enqueue payment job' do
         expect(CreatePaymentJob).not_to receive(:perform_async)
+
+        expect { reservation_service.create! }.to raise_error(CreateReservationService::Error)
+      end
+
+      it 'does not call ReservationDatesService' do
+        expect(ReservationDatesService).not_to receive(:create!)
+
         expect { reservation_service.create! }.to raise_error(CreateReservationService::Error)
       end
     end
